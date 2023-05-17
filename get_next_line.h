@@ -19,13 +19,13 @@ typedef struct	s_list
 }				t_list;
 
 char	*get_next_line(int fd);
-int 	found_newline(t_list *stash);
-t_list	*ft_lst_get_last(t_list *stash);
-void	read_and_stash(int fd, t_list **stash);
-void	add_to_stash(t_list **stash, char *buf, int readed);
-void	extract_line(t_list *stash, char **line);
-void	generate_line(char **line, t_list *stash);
-void	clean_stash(t_list **stash);
+int 	found_newline(t_list *stock);
+t_list	*ft_lst_get_last(t_list *stock);
+void	read_and_stock(int fd, t_list **stock, int *readed_ptr);
+void	add_to_stock(t_list **stock, char *buf, int readed);
+void	extract_line(t_list *stock, char **line);
+void	generate_line(char **line, t_list *stock);
+void	clean_stock(t_list **stock);
 int 	ft_strlen(const char *str);
-void	free_stash(t_list *stash);
+void	free_stock(t_list *stock);
 #endif
