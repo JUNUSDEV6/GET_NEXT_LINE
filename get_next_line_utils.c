@@ -3,90 +3,117 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yohanafi <yohanafi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: youneshanafi <youneshanafi@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/08 14:57:20 by yohanafi          #+#    #+#             */
-/*   Updated: 2023/05/26 12:05:30 by yohanafi         ###   ########.fr       */
+/*   Created: 2023/09/14 15:16:03 by youneshanaf       #+#    #+#             */
+/*   Updated: 2023/09/19 09:11:29 by youneshanaf      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-// look for a newline charactere in the given linked list
-int	found_newline(t_list *stock)
-{
-	int		i;
-	t_list	*current;
+#include <stdlib.h>
 
-	if (!stock)
-		return (0);
-	current = ft_lst_get_last(stock);
+int found_newline(t_list *list)
+{
+	int i;
+	
 	i = 0;
-	while (current->content[i])
+	if (list == NULL)
+		return (0);
+	while (list)
 	{
-		if (current->content[i] == '\n')
-			return (1);
-		i++;
+		i = 0;
+		while (list->str_buf[i] && i < BUFFER_SIZE)
+		{
+			if (list->str_buf[i] == '\n')
+				return 1;
+			i++;
+		}
+		list = list->next;
 	}
 	return (0);
 }
 
-t_list	*ft_lst_get_last(t_list *stock)
+t_list  *find_last_node(t_list *list)
 {
-	t_list	*current;
-
-	current = stock;
-	while (current && current->next)
-		current = current->next;
-	return (current);
+	if (list == NULL)
+		return (NULL);
+	while (list->next)
+		list = list->next;
+	return (list);
 }
 
-//calculates the number of chars in the lines including the \n 
-//and then convert the size into malloc
-void	generate_line(char **line, t_list *stock)
+void    str_copy(t_list *list, char *str)
 {
-	int	i;
-	int	len;
-
-	len = 0;
-	while (stock)
+	int i;
+	int j;
+	
+	if (list == NULL)
+		return ;
+	j = 0;
+	while (list)
 	{
 		i = 0;
-		while (stock->content[i])
+		while (list->str_buf[i])
 		{
-			if (stock->content[i] == '\n')
+			if (list->str_buf[i] == '\n')
+			{
+				str[j++] = '\n';
+				str[j] = '\0';
+				return ;
+			}
+			str[j++] = list->str_buf[i++];
+		}
+		list = list->next;
+	}
+	str[j] = '\0';
+}
+
+int len_newline(t_list *list)
+{
+	int i;
+	int len;
+	
+	if (list == NULL)
+		return (0);
+	len = 0;
+	while(list)
+	{
+		i = 0;
+		while (list->str_buf[i])
+		{
+			if (list->str_buf[i] == '\n')
 			{
 				len++;
-				break ;
+				return(len);
 			}
-			len++;
-			i++;
+			++i;
+			++len;
 		}
-		stock = stock->next;
+		list = list->next;
 	}
-	*line = malloc(sizeof(char) * (len + 1));
+	return (len);
 }
 
-void	free_stock(t_list *stock)
+void    dealloc(t_list **list, t_list *clean_node, char *buff)
 {
-	t_list	*current;
-	t_list	*next;
-
-	current = stock;
-	while (current)
+	t_list *tmp;
+	
+	if (*list == NULL)
+		return ;
+	while (*list)
 	{
-		free(current->content);
-		next = current->next;
-		free(current);
-		current = next;
+		tmp = (*list)->next;
+		free((*list)->str_buf);
+		free(*list);
+		*list = tmp;
 	}
-}
-
-int	ft_strlen(const char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
+	*list = NULL;
+	if (clean_node->str_buf[0])
+		*list = clean_node;
+	else
+	{
+		free(buff);
+		free(clean_node);
+	}
 }

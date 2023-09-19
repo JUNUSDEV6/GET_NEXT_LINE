@@ -3,169 +3,105 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yohanafi <yohanafi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: youneshanafi <youneshanafi@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/08 14:57:13 by yohanafi          #+#    #+#             */
-/*   Updated: 2023/05/26 12:04:00 by yohanafi         ###   ########.fr       */
+/*   Created: 2023/09/17 18:02:01 by youneshanaf       #+#    #+#             */
+/*   Updated: 2023/09/19 11:15:46 by youneshanaf      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-// 1. read from fd and add to linked list
-/* 2. extract from stock to line*/
-/* 3. clean up stock*/
-char	*get_next_line(int fd)
+
+void    polish_list(t_list **list)
 {
-	static t_list	*stock;
-	char			*line;
-	int				readed;
-
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &line, 0) < 0)
-		return (NULL);
-	readed = 1;
-	line = NULL;
-	read_and_stock(fd, &stock, &readed);
-	if (!stock)
-		return (NULL);
-	extract_line(stock, &line);
-	clean_stock(&stock);
-	if (line[0] == '\0')
-	{
-		free_stock(stock);
-		stock = NULL;
-		free(line);
-		return (NULL);
-	}
-	return (line);
-}
-
-void	read_and_stock(int fd, t_list **stock, int *readed_ptr)
-{
-	char	*buf;
-
-	while (found_newline(*stock) || *readed_ptr != 0)
-	{
-		buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (!buf)
-			return ;
-		*readed_ptr = (int)read(fd, buf, BUFFER_SIZE);
-		if ((!stock && *readed_ptr == 0) || *readed_ptr == -1)
-			return (free(buf));
-		buf[*readed_ptr] = '\0';
-		add_to_stock(stock, buf, *readed_ptr);
-		free(buf);
-	}
-}
-
-// addts the content of our buffer to your end of our stock
-
-void	add_to_stock(t_list **stock, char *buf, int readed)
-{
-	int		i;
-	t_list	*last;
-	t_list	*new_node;
-
-	new_node = malloc(sizeof(t_list));
-	if (!new_node)
-		return ;
-	new_node->next = NULL;
-	new_node->content = malloc(sizeof(char) *(readed + 1));
-	if (!new_node->content)
-		return ;
-	i = 0;
-	while (buf[i] && i < readed)
-	{
-		new_node->content[i] = buf[i];
-		i++;
-	}
-	new_node->content[i] = '\0';
-	if (!*stock)
-	{
-		*stock = new_node;
-		return ;
-	}
-	last = ft_lst_get_last(*stock);
-	last->next = new_node;
-}
-// extract all charactere from our stock and store them in out line;
-// stopping afther the first \n it encounters 
-
-void	extract_line(t_list *stock, char **line)
-{
-	int	i;
-	int	j;
-
-	if (!stock)
-		return ;
-	generate_line(line, stock);
-	if (!*line)
-		return ;
-	j = 0;
-	while (stock)
-	{
-		i = 0;
-		while (stock->content[i])
-		{
-			if (stock->content[i] == '\n')
-			{
-				(*line)[j++] = stock->content[i];
-				break ;
-			}
-			(*line)[j++] = stock->content[i++];
-		}
-		stock = stock->next;
-	}
-	(*line)[j] = '\0';
-}
-
-/* afther extracting the line that was read,
- we don't need those charactere anaymore
-this fonction clear the stock so only the characters
- that have not been returned at the end of get_next_line()
- \remain in our static stock;
-*/
-
-void	clean_stock(t_list **stock)
-{
-	t_list	*last;
-	t_list	*clean_node;
-	int		i;
-	int		j;
-
+	t_list  *last_node;
+	t_list  *clean_node;
+	int     i;
+	int     j;
+	char    *buff;
+	
+	buff = malloc(BUFFER_SIZE + 1);
 	clean_node = malloc(sizeof(t_list));
-	if (!stock || !clean_node)
-		return ;
-	clean_node->next = NULL;
-	last = ft_lst_get_last(*stock);
+	if (buff == NULL || clean_node == NULL)
+		return;
+	last_node = find_last_node(*list);
 	i = 0;
-	while (last->content[i] && last->content[i] != '\n')
-		i++;
-	if (last->content && last->content[i] == '\n')
-		i++;
-	clean_node->content = malloc(sizeof(char)
-			* ((ft_strlen(last->content) - i) + 1));
-	if (!clean_node->content)
-		return ;
 	j = 0;
-	while (last->content[i])
-		clean_node->content[j++] = last->content[i++];
-	clean_node->content[j] = '\0';
-	free_stock(*stock);
-	*stock = clean_node;
+	while (last_node->str_buf[i] && last_node->str_buf[i] != '\n')
+		++i;
+	while (last_node->str_buf[i] && last_node->str_buf[++i])
+		buff[j++] = last_node->str_buf[i];
+	buff[j] = '\0';
+	clean_node->str_buf = buff;
+	clean_node->next = NULL;
+	dealloc(list, clean_node, buff);
 }
 
-//int main()
-//{
-//	int		fd;
-//	char	*line;
-//
-//	fd = open("test/simple");
-//	while (1)
-//	{
-//		line = get_next_line(fd);
-//		if (line == NULL)
-//			break;
-//		printf("%s", line);
-//		free(line);
-//	}
-//}
+char    *get_line(t_list *list)
+{
+	int     len_str;
+	char    *next_str;
+	
+	if (list == NULL)
+		return (NULL);
+	len_str = len_newline(list);
+	next_str = malloc(len_str + 1);
+	if (next_str == NULL)
+		return (NULL);
+	str_copy(list, next_str);
+	return (next_str);
+}
+
+void    add(t_list **list, char *buff)
+{
+	t_list  *new_node;
+	t_list  *last_node;
+	
+	last_node = find_last_node(*list);
+	new_node = malloc(sizeof(t_list));
+	if (new_node == NULL)
+		return ;
+	if (last_node == NULL)
+		*list = new_node;
+	else
+		last_node->next = new_node;
+	new_node->str_buf = buff;
+	new_node->next = NULL;
+}
+
+void    create_list(t_list **list, int fd)
+{
+	int     cnt_chr;
+	char    *buff;
+	
+	while (!found_newline(*list))
+	{
+		buff = malloc(BUFFER_SIZE + 1);
+		if (buff == NULL)
+			return ;
+		cnt_chr = read(fd, buff, BUFFER_SIZE);
+		if (!cnt_chr)
+		{
+			free(buff);
+			return ;
+		}
+		buff[cnt_chr] = '\0';
+		add(list, buff);
+	}
+}
+
+char    *get_next_line(int fd)
+{
+	static t_list   *list = NULL;
+	char            *next_line;
+	
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &next_line, 0) < 0)
+		return (NULL);
+	create_list(&list, fd);
+	if (list == NULL)
+		return (NULL);
+	next_line = get_line(list);
+	polish_list(&list);
+	return(next_line);
+	
+}

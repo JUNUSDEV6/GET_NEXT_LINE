@@ -3,41 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yohanafi <yohanafi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: youneshanafi <youneshanafi@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/24 13:59:34 by yohanafi          #+#    #+#             */
-/*   Updated: 2023/05/26 12:10:04 by yohanafi         ###   ########.fr       */
+/*   Created: 2023/09/12 16:45:56 by youneshanaf       #+#    #+#             */
+/*   Updated: 2023/09/19 09:12:59 by youneshanaf      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-# include <stdio.h> // REMOVE FOR PUSH
-# include <stdlib.h>
-
-# include <sys/types.h>
-# include <sys/uio.h>
-# include <unistd.h>
-
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
+#  define BUFFER_SIZE 10 
 # endif
+
+# include <fcntl.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <stdio.h>
 
 typedef struct s_list
 {
-	char			*content;
+	char			*str_buf;
 	struct s_list	*next;
 }				t_list;
 
+int		found_newline(t_list *list);
+t_list	*find_last_node(t_list *list);
+char	*get_line(t_list *list);
+void	str_copy(t_list *list, char *str);
+int		len_newline(t_list *list);
+void	polish_list(t_list **list);
 char	*get_next_line(int fd);
-int		found_newline(t_list *stock);
-int		ft_strlen(const char *str);
-t_list	*ft_lst_get_last(t_list *stock);
-void	read_and_stock(int fd, t_list **stock, int *readed_ptr);
-void	add_to_stock(t_list **stock, char *buf, int readed);
-void	extract_line(t_list *stock, char **line);
-void	generate_line(char **line, t_list *stock);
-void	clean_stock(t_list **stock);
-void	free_stock(t_list *stock);
+void	dealloc(t_list **list, t_list *clean_node, char *buff);
+void	create_list(t_list **list, int fd);
+
 #endif
