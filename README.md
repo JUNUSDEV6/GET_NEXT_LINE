@@ -128,7 +128,7 @@ To test the function thoroughly, consider:
 
 ## Author
 
-Created by **youneshanafi** as part of the 42 School curriculum.
+Created by **yohanafi** as part of the 42 School curriculum.
 
 ## License
 
